@@ -1,9 +1,3 @@
-/*
-Replace max() with any associative function for HLD
-
-update() => update(ind, val)
-path() => path(st, en)
-*/
 // Source: http://www.usaco.org/index.php?page=viewproblem2&cpid=921
 
 #include "bits/stdc++.h"
@@ -108,10 +102,13 @@ int path(int x, int y) {
 
 	return ret;
 }
-
+int q;
 int main() {
+	freopen("cowland.in", "r", stdin);
+	freopen("cowland.out", "w", stdout);
+
 	cin.tie(0)->sync_with_stdio(0);
-	cin >> n;
+	cin >> n >> q;
 
 	for (int i = 1; i <= n; i++) cin >> v[i];
 	for (int i = 0; i < n-1; i++) {
@@ -124,4 +121,28 @@ int main() {
 
 	dfs_sz(1, 1);
 	dfs_hld(1, 1, 1);
+	// cout << path(0, 4) << endl;
+	FOR(i, 0, q) {
+		int a, b, c;
+		cin >> a >> b >> c;
+
+		if (a == 1) {
+			update(b, c);
+		} else {
+
+			cout << path(b, c) << endl;
+		}
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
