@@ -26,10 +26,92 @@ typedef vector<int> vi;
 
 const int N = 2e5 + 5;
 
-vi adj[N];
+// Start
+
+#define lc i << 1
+#define rc (i << 1) + 1
+
 int n;
 
-int st[4*N];
+struct node {
+	int val = 0;
+	int lz = 0;
+} st[4 * N];
+int a[N];
+
+int comb(int a, int b) { // MODIFY COMBINER FUNCTION
+	return a + b;
+}
+
+void up(int i) {
+	st[i].val = comb(st[lc].val, st[rc].val);
+}
+
+void down(int i) { // Propogate Lazy Downwards
+	st[rc].val += st[i].lz;
+	st[lc].val += st[i].lz;
+
+	st[rc].lz += st[i].lz;
+	st[lc].lz += st[i].lz;
+
+	st[i].lz = 0;
+}
+
+void build(int i = 1, int l = 0, int r = n) { // build segtree from array a
+	if (l>=r) return;
+	if (r - l == 1) {
+		st[i].val=a[l];
+		return;
+	}
+
+	int m = (l + r)/2;
+
+	build(lc, l, m);
+	build(rc, m, r);
+	up(i);
+}
+
+void update(int ul, int ur, int val, int i = 1, int l = 0, int r = n) { // update [ul, ur) with += val
+	if (l >= r) return;
+	if (r <= ur && l >= ul) {
+		st[i].val += (r - l) * val;
+		st[i].lz += val;
+		return;
+	}
+
+	down(i); // Propogate Lazy Down
+
+	int m = (l + r)/2;
+
+	if (m > ul) update(ul, ur, val, lc, l, m); // contained in left child
+	if (m < ur) update(ul, ur, val, rc, m, r); // contained in right child
+
+	up(i); // update current index
+}
+
+int query(int ql, int qr, int i = 1, int l = 0, int r = n) { // query from [ql, qr)
+
+	if (l >= r) return 0; // identity
+	if (ql <= l && qr >= r) { // fully contained
+		return st[i].val;
+	}
+
+	if (r - l == 1) return 0; // leaf node
+
+	down(i);
+
+	int m = (l + r)/2;
+
+	int acc = 0; // SET DEFAULT VALUE
+
+	if (m >= ql) acc = comb(query(ql, qr, lc, l, m), acc); // Left
+	if (m <= qr) acc = comb(acc, query(ql, qr, rc, m, r)); // Right
+
+	return acc;
+}
+
+vi adj[N];
+
 int sz[N];
 int p[N];
 int dep[N];
@@ -37,24 +119,26 @@ int id[N];
 int tp[N];
 int t = 0;
 
-int comb(int a, int b) {
-	return a ^ b;
-}
+// int st[4*N];
 
-void update(int idx, int val) {
-	idx=id[idx];
-	st[idx += n] = val;
-	for (idx /= 2; idx; idx /= 2) st[idx] = comb(st[2 * idx], st[2 * idx + 1]);
-}
+// int comb(int a, int b) {
+// 	return a + b;
+// }
 
-int query(int lo, int hi) {
-	int ra = 0, rb = 0;
-	for (lo += n, hi += n + 1; lo < hi; lo /= 2, hi /= 2) {
-		if (lo & 1) ra = comb(ra, st[lo++]);
-		if (hi & 1) rb = comb(rb, st[--hi]);
-	}
-	return comb(ra, rb);
-}
+// void update(int idx, int val) {
+// 	idx=id[idx];
+// 	st[idx += n] = val;
+// 	for (idx /= 2; idx; idx /= 2) st[idx] = comb(st[2 * idx], st[2 * idx + 1]);
+// }
+
+// int query(int lo, int hi) {
+// 	int ra = 0, rb = 0;
+// 	for (lo += n, hi += n + 1; lo < hi; lo /= 2, hi /= 2) {
+// 		if (lo & 1) ra = comb(ra, st[lo++]);
+// 		if (hi & 1) rb = comb(rb, st[--hi]);
+// 	}
+// 	return comb(ra, rb);
+// }
 
 int dfs_sz(int cur, int par) {
 	sz[cur] = 1;
@@ -67,12 +151,12 @@ int dfs_sz(int cur, int par) {
 	}
 	return sz[cur];
 }
-int v[N];
+// int v[N];
 void dfs_hld(int cur, int p, int top) {
 	tp[cur] = top;
 	id[cur]=t++;
 	// cout << cur << endl;
-	update(cur, v[cur]);
+	// update(cur, v[cur]);
 	int comb_sz = -1;
 	int comb_val = -1;
 	for (int x: adj[cur]) {
@@ -92,28 +176,30 @@ void dfs_hld(int cur, int p, int top) {
 	}
 }
 
-int path(int x, int y) {
-	int ret = 0;
-
-	while (tp[x] != tp[y]) {
-		if (dep[tp[x]] < dep[tp[y]]) swap(x, y);
-
-		ret = comb(ret, query(id[tp[x]], id[x]));
-		// cout << query(5, 6) << endl;
-		x = p[tp[x]];
-	}
-
-	if (dep[x] > dep[y]) swap(x, y);
-	ret = comb(ret, query(id[x], id[y]));
-
-	return ret;
+int value(int x) {
+	return query(id[x], id[x] + 1);
 }
 
+void updatePath(int x, int y, int val) {
+	while (tp[x] != tp[y]) {
+		if (dep[tp[x]] < dep[tp[y]]) swap(x, y);
+		// cout << id[x] << id[tp[x]] << endl;
+		update(id[tp[x]], id[x] + 1, val);
+		x = p[tp[x]];
+	}
+	// cout << y << endl;
+	if (dep[x] > dep[y]) swap(x, y);
+	update(id[x] + 1, id[y] + 1, val); // exclude LCA
+	// update(id[x], id[x] + 1, -val);
+
+}
+
+int q;
 int main() {
 	cin.tie(0)->sync_with_stdio(0);
-	cin >> n;
+	cin >> n >> q;
 
-	for (int i = 1; i <= n; i++) cin >> v[i];
+	// for (int i = 1; i <= n; i++) cin >> a[i];
 	for (int i = 0; i < n-1; i++) {
 		int a, b;
 		cin >> a >> b;
@@ -124,4 +210,20 @@ int main() {
 
 	dfs_sz(1, 1);
 	dfs_hld(1, 1, 1);
+	// cout << q << endl;
+	FOR(i, 0, q) {
+		char t;
+		cin >> t;
+		if (t == 'P') {
+			int a, b;
+			cin >> a >> b;
+			updatePath(a, b, 1);
+		} else {
+			int a, b;
+			cin >> a >> b;
+
+			if (dep[a] > dep[b]) swap(a, b);
+			cout << value(b) << endl;
+		}
+	}
 }

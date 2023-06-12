@@ -1,78 +1,129 @@
-// Basic RURQ Segment Tree
+// Basic Lazy Segment Tree
 
-// Update O(log n) => update(l, r, val)
-// Query O(log n) => query(l, r, val)
+// Update O(log n)
+// Query O(log n)
 
-// NOTE RANGES ARE EXCLUSIVE OF RIGHT ENDPOINT
+// Changes
+// comb - associative function
+// down - how to update lazy
+// update - how to update without traversing children
+// query - defualt value & identity value
 
-#define lc n << 1
-#define rc (n << 1) + 1
+const int N = 1e5;
 
-ll a[N];
+#define lc i << 1
+#define rc (i << 1) + 1
+
+int n;
 
 struct node {
-	// ll sum;
-	// ll min;
-	// ll lz;
-} segTree[N * 4];
+	int val = 0;
+	int lz = 0;
+} st[4 * N];
+int a[N];
+
+int comb(int a, int b) { // MODIFY COMBINER FUNCTION
+	return a + b;
+}
+
+void up(int i) {
+	st[i].val = comb(st[lc].val, st[rc].val);
+}
+
+void down(int i) { // Propogate Lazy Downwards
+	st[rc].val += st[i].lz;
+	st[lc].val += st[i].lz;
+
+	st[rc].lz += st[i].lz;
+	st[lc].lz += st[i].lz;
+
+	st[i].lz = 0;
+}
+
+void build(int i = 1, int l = 0, int r = n) { // build segtree from array a
+	if (l>=r) return;
+	if (r - l == 1) {
+		st[i].val=a[l];
+		return;
+	}
+
+	int m = (l + r)/2;
+
+	build(lc, l, m);
+	build(rc, m, r);
+	up(i);
+}
+
+void update(int ul, int ur, int val, int i = 1, int l = 0, int r = n) { // update [ul, ur) with += val
+	if (l >= r) return;
+	if (r <= ur && l >= ul) {
+		st[i].val += (r - l) * val;
+		st[i].lz += val;
+		return;
+	}
+
+	down(i); // Propogate Lazy Down
+
+	int m = (l + r)/2;
+
+	if (m > ul) update(ul, ur, val, lc, l, m); // contained in left child
+	if (m < ur) update(ul, ur, val, rc, m, r); // contained in right child
+
+	up(i); // update current index
+}
+
+int query(int ql, int qr, int i = 1, int l = 0, int r = n) { // query from [ql, qr)
+
+	if (l >= r) return 0; // identity
+	if (ql <= l && qr >= r) { // fully contained
+		return st[i].val;
+	}
+
+	if (r - l == 1) return 0; // leaf node
+
+	down(i);
+
+	int m = (l + r)/2;
+
+	int acc = 0; // SET DEFAULT VALUE
+
+	if (m >= ql) acc = comb(query(ql, qr, lc, l, m), acc); // Left
+	if (m <= qr) acc = comb(acc, query(ql, qr, rc, m, r)); // Right
+
+	return acc;
+}
 
 
-void down(ll n, ll nl, ll nr) { // Update lazy of children from parent
-	if (segTree[n].lz != 0) {
-		int nm = (nl + nr)/2;
-		// update(n*2, nl, nm, segTree[n].lz);
-		// update(n*2 + 1, nm, nr, segTree[n].lz);
-		// segTree[n].lz = 0;
+int main() {
+
+	cin >> n;
+
+	FOR(i, 0, n) cin >> a[i];
+
+	build();
+
+	FOR(i, 0, 100) {
+		int a, b, c;
+		cin >> a >> b >> c;
+
+		if (a == 1) {
+			int d;
+			cin >> d;
+			update(--b, c, d);
+		} else {
+			cout << query(--b, c) << endl;
+		}
 	}
 }
 
-void up(ll n) { // update value of parent from children
-	// segTree[n].sum = segTree[2 * n].sum + segTree[2 *n + 1].sum;
-	// segTree[n].min = min(segTree[2 * n].min, segTree[2 *n + 1].min);
-}
-
-void build(ll n = 1, ll nl = 0, ll nr = n) {
-
-	if (nr - nl > 1) {
-		ll nm = (nl + nr)/2;
-
-		build(2*n, nl, nm);
-		build(2 * n + 1, nm, nr);
-		up(n);
-	} else {
-		// segTree[n].sum = a[nl];
-		// segTree[n].min = a[nl];
-	}
-}
-
-void update(ll gl, ll gr, ll val, ll n = 1, ll nl = 0, ll nr = n) {
-	if (gl <= nl && nr <= gr) {
-		update(n, nl, nr, val);
-	} else {
-		down(n, nl, nr);
-		ll nm = (nl + nr)/2;
-
-		if (gl < nm) update(gl, gr, val, 2*n, nl, nm);
-		if (nm < gr) update(gl, gr, val, 2 * n + 1, nm, nr);
-
-		up(n);
-	}
-}
 
 
-ll query(ll gl, ll gr, ll n = 1, ll nl = 0, ll nr = n) { 
-	if (gl <= nl && nr <= gr) {
-		return segTree[n].min;
-	} else {
-		down(n, nl, nr);
-		ll nm = (nl + nr)/2;
-		ll acc = ; // DEFAULT VALUE
-		if (gl < nm) acc = comb(acc, query(nm, gl, gr, 2*n, nl)); // CHANGE COMBINER FUNCTION
-		if (nm < gr) acc = comb(query(nr, gl, gr, 2 * n + 1, nm), acc);
 
-		return acc;
-	}
-}
+
+
+
+
+
 
 
 
