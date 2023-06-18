@@ -17,8 +17,8 @@ const int N = 1e5;
 int n;
 
 struct node {
-	int val = 0;
-	int lz = 0;
+	int val;
+	int lz;
 } st[4 * N];
 int a[N];
 

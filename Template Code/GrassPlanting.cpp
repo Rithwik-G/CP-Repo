@@ -4,7 +4,7 @@ Replace max() with any associative function for HLD
 update() => update(ind, val)
 path() => path(st, en)
 */
-// Source: http://www.usaco.org/index.php?page=viewproblem2&cpid=921
+// Source: http://usaco.org/index.php?page=viewproblem2&cpid=102
 
 #include "bits/stdc++.h"
 
@@ -28,84 +28,55 @@ const int N = 1e5 + 5;
 
 // Start
 
+// const int N = 1e5;
+
 #define lc i << 1
 #define rc (i << 1) + 1
 
 int n;
 
-struct node {
-	int val = 0;
-	int lz = 0;
-} st[4 * N];
+int st[4 * N];
 int a[N];
 
 int comb(int a, int b) { // MODIFY COMBINER FUNCTION
-	return a + b;
+	return a+b;
 }
 
 void up(int i) {
-	st[i].val = comb(st[lc].val, st[rc].val);
+	st[i] = comb(st[lc], st[rc]);
 }
 
-void down(int i) { // Propogate Lazy Downwards
-	st[rc].val += st[i].lz;
-	st[lc].val += st[i].lz;
 
-	st[rc].lz += st[i].lz;
-	st[lc].lz += st[i].lz;
-
-	st[i].lz = 0;
-}
-
-void build(int i = 1, int l = 0, int r = n) { // build segtree from array a
-	if (l>=r) return;
-	if (r - l == 1) {
-		st[i].val=a[l];
-		return;
-	}
-
-	int m = (l + r)/2;
-
-	build(lc, l, m);
-	build(rc, m, r);
-	up(i);
-}
-
-void update(int ul, int ur, int val, int i = 1, int l = 0, int r = n) { // update [ul, ur) with += val
+void update(int ind, int val, int i = 1, int l = 0, int r = n) { // update pos ind with value val
 	if (l >= r) return;
-	if (r <= ur && l >= ul) {
-		st[i].val += (r - l) * val;
-		st[i].lz += val;
+	if (r - l == 1) {
+		st[i] += val;
 		return;
 	}
 
-	down(i); // Propogate Lazy Down
-
 	int m = (l + r)/2;
 
-	if (m > ul) update(ul, ur, val, lc, l, m); // contained in left child
-	if (m < ur) update(ul, ur, val, rc, m, r); // contained in right child
+	if (m > ind) update(ind, val, lc, l, m); // contained in left child
+	else update(ind, val, rc, m, r); // contained in right child
 
 	up(i); // update current index
 }
 
 int query(int ql, int qr, int i = 1, int l = 0, int r = n) { // query from [ql, qr)
-
+	
 	if (l >= r) return 0; // identity
 	if (ql <= l && qr >= r) { // fully contained
-		return st[i].val;
+		return st[i];
 	}
 
 	if (r - l == 1) return 0; // leaf node
-
-	down(i);
 
 	int m = (l + r)/2;
 
 	int acc = 0; // SET DEFAULT VALUE
 
-	if (m >= ql) acc = comb(query(ql, qr, lc, l, m), acc); // Left
-	if (m <= qr) acc = comb(acc, query(ql, qr, rc, m, r)); // Right
+	if (m >= ql) acc = comb(query(ql, qr, lc, l, m), acc);
+	if (m <= qr) acc = comb(acc, query(ql, qr, rc, m, r));
 
 	return acc;
 }
@@ -156,23 +127,24 @@ void dfs_hld(int cur, int p, int top) {
 }
 
 int value(int x) {
-	return query(id[x], id[x] + 1);
+	return query(0, id[x] + 1);
 }
 
 void updatePath(int x, int y, int val) {
 	while (tp[x] != tp[y]) {
 		if (dep[tp[x]] < dep[tp[y]]) swap(x, y);
 		// cout << id[x] << id[tp[x]] << endl;
-		cout << id[tp[x]] << id[x] + 1 << endl;
-		
-		update(id[tp[x]], id[x] + 1, val);
+		update(id[tp[x]], val);
+		update(id[x] + 1, -val);
+		// cout << id[tp[x]] << id[x] + 1 << endl;
 		x = p[tp[x]];
 	}
 	// cout << y << endl;
 	if (dep[x] > dep[y]) swap(x, y);
+	// update(id[x] + 1, id[y] + 1, val); // exclude LCA
 	cout << id[x] + 1 << id[y] + 1 << endl;
-
-	update(id[x] + 1, id[y] + 1, val); // exclude LCA
+	update(id[x] + 1, val);
+	update(id[y] + 1, -val);
 	// update(id[x], id[x] + 1, -val);
 
 }

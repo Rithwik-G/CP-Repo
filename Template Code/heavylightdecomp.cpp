@@ -119,27 +119,6 @@ int id[N];
 int tp[N];
 int t = 0;
 
-// int st[4*N];
-
-// int comb(int a, int b) {
-// 	return a + b;
-// }
-
-// void update(int idx, int val) {
-// 	idx=id[idx];
-// 	st[idx += n] = val;
-// 	for (idx /= 2; idx; idx /= 2) st[idx] = comb(st[2 * idx], st[2 * idx + 1]);
-// }
-
-// int query(int lo, int hi) {
-// 	int ra = 0, rb = 0;
-// 	for (lo += n, hi += n + 1; lo < hi; lo /= 2, hi /= 2) {
-// 		if (lo & 1) ra = comb(ra, st[lo++]);
-// 		if (hi & 1) rb = comb(rb, st[--hi]);
-// 	}
-// 	return comb(ra, rb);
-// }
-
 int dfs_sz(int cur, int par) {
 	sz[cur] = 1;
 	p[cur] = par;
@@ -176,9 +155,6 @@ void dfs_hld(int cur, int p, int top) {
 	}
 }
 
-int value(int x) {
-	return query(id[x], id[x] + 1);
-}
 
 void updatePath(int x, int y, int val) {
 	while (tp[x] != tp[y]) {
@@ -189,8 +165,8 @@ void updatePath(int x, int y, int val) {
 	}
 	// cout << y << endl;
 	if (dep[x] > dep[y]) swap(x, y);
-	update(id[x] + 1, id[y] + 1, val); // exclude LCA
-	// update(id[x], id[x] + 1, -val);
+	update(id[x], id[y] + 1, val);
+
 
 }
 
@@ -199,7 +175,6 @@ int main() {
 	cin.tie(0)->sync_with_stdio(0);
 	cin >> n >> q;
 
-	// for (int i = 1; i <= n; i++) cin >> a[i];
 	for (int i = 0; i < n-1; i++) {
 		int a, b;
 		cin >> a >> b;
