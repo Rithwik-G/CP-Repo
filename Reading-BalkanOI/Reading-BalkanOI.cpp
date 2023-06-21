@@ -1,5 +1,5 @@
 // Source: https://www.acmicpc.net/problem/7081
-// Result: Not Good
+// Result:
 
 #include "bits/stdc++.h"
 
@@ -89,13 +89,9 @@ int main() {
 		adj.a[5 * b][5 * a + w - 1] = 1;
 	}
 
-	// FOR(i, 0, SZ) FOR(j, 0, SZ) if (adj.a[i][j]) cout << i << ' ' << j << endl;
-
 	Matrix ans = exp(adj, n + 1);
 
 	ll res = 0;
-
-	// FOR(i, 0, SZ) FOR(j, 0, SZ) if (ans.a[i][j]) cout << i << ' ' << j << endl;
 
 	FOR(i, 0, 26) {
 		res = (res+ans.a[5*i][0]) % MOD;

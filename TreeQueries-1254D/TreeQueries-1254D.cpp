@@ -1,5 +1,5 @@
 // Source: https://codeforces.com/contest/1254/problem/D
-// DEBUG LATER
+//
 #include "bits/stdc++.h"
 
 using namespace std;
