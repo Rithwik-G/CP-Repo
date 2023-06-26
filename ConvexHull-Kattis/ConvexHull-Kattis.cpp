@@ -1,4 +1,25 @@
-// use built in complex number support
+// Source: https://open.kattis.com/problems/convexhull
+// AC
+
+#include "bits/stdc++.h"
+
+using namespace std;
+
+#define s second
+#define f first
+#define pb push_back
+
+typedef long long ll;
+
+typedef pair<ll, ll> pii;
+typedef vector<pii> vpii;
+
+typedef vector<ll> vi;
+
+#define FOR(i, a, b) for (ll i = (a); i<b; i++)
+
+
+// Point Support
 
 typedef long long T;
 typedef complex<T> pt;
@@ -13,7 +34,7 @@ T dist(pt a) {
 	return (a.x) * (a.x) + (a.y) * (a.y);
 }
 
-vector<pt> Hull(vector<pt> v) {
+vector<pt> solve(vector<pt> v) {
 	int ind = int(min_element(v.begin(), v.end(), [&](pt p1, pt p2) {
 		if (p1.x == p2.x) return p1.y < p2.y;
 		else return p1.x < p2.x;
@@ -44,3 +65,39 @@ vector<pt> Hull(vector<pt> v) {
 
 	return hull;
 }
+
+
+int main() {
+	ios::sync_with_stdio(false);
+	cin.tie(nullptr);
+	while (true) {
+		int n;
+		cin >> n;
+		if (!n) break;
+
+		vector<pt> points(n);
+
+		FOR(i, 0, n) {
+			int a, b;
+			cin >> a >> b;
+			points[i]={a, b};
+		}
+
+		vector<pt> hull = solve(points);
+		cout << hull.size() << endl;
+		for (auto point: hull) cout << point.x << ' ' << point.y << endl;
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+

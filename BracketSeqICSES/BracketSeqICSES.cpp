@@ -1,4 +1,5 @@
 // Source: https://cses.fi/problemset/task/2064
+// AC
 
 #include "bits/stdc++.h"
 
