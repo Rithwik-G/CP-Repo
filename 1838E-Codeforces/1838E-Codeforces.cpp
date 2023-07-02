@@ -1,5 +1,6 @@
 // Source: https://codeforces.com/problemset/problem/1838/E
 
+// AC
 #include "bits/stdc++.h"
 
 using namespace std;

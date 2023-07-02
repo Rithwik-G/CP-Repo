@@ -106,7 +106,7 @@ int main() {
 		int cur_x = hull[(i - 1 + hull.size()) % hull.size()].x;
 		int along = 0;
 		while (cur_x >= cur) {
-			val += sl;
+			// val += sl;
 			// cout << cur_x << endl;
 			cout << (long long) (val * 1e5) << endl;
 			cur++;
