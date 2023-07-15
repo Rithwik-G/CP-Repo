@@ -1,4 +1,5 @@
-
+// Source: https://codeforces.com/problemset/problem/1718/C
+// 
 
 #include "bits/stdc++.h"
 
@@ -21,6 +22,14 @@ typedef vector<int> vi;
 int main() {
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
+
+	int t;
+	cin >> t;
+
+	t--;
+
+
+
 
 }
 

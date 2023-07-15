@@ -24,7 +24,6 @@ vi adj[N];
 ll k;
 
 ll dfs(ll cur, ll p = -1) {
-	if (adj[cur].size() == 1 && cur != 1) return 0; 
 	vi vals;
 
 	for (auto val: adj[cur]) {
@@ -35,44 +34,71 @@ ll dfs(ll cur, ll p = -1) {
 			vals.pb(poss + 1);
 		}
 	}
+
 	sort(vals.begin(), vals.end());
+	bool evenPoss = false;
 	if (vals.size() % 2 == 0) {
+		evenPoss = true;
 		ll l = 0;
 		ll r = vals.size() - 1;
 		while (l < r) {
 			if (vals[l] + vals[r] < k) {
-				return -1;
+				evenPoss = false;
 				break;
 			}
 			l++;
 			r--;
 		}
 
-		return 0;
 	}
 
 	if (vals.size() == 1) return vals[0];
 
 	ll lo = 0;
-	ll hi = vals.size();
+	ll hi = vals.size()-1;
 	bool works = false;
 	ll best;
 	while (lo < hi) {
 		bool bad = false;
 		ll m = (hi + lo + 1)/2;
 
-		ll l = 0;
-		ll r = vals.size() - 1;
-		while (l < r) {
+
+		int l= 0;
+		int r = vals.size() - 1;
+
+		while (r > l) {
+			if (vals[l] >= k) break;
+
 			if (vals[l] + vals[r] < k) {
-				bad = true;
+				bad= true;
 				break;
 			}
+
 			l++;
 			r--;
-			if (r == m) r--;
+
 			if (l == m) l++;
+			if (r == m) r--;
 		}
+		if (l == r && vals[l] < k) bad= true;
+		// multiset<int> st;
+		// for (auto val: vals) st.insert(val);
+
+		// while (st.size() > 0) {
+		// 	ll val = *st.begin();
+
+		// 	st.erase(st.begin());
+		// 	if (val >= k) continue;
+
+		// 	auto it = st.lower_bound(k - val);
+		// 	if (it == st.end()) {
+		// 		bad = true;
+		// 		break;
+		// 	}
+
+		// 	st.erase(it);
+		// }
+
 
 		if (bad) hi = m - 1;
 		else {
@@ -82,28 +108,15 @@ ll dfs(ll cur, ll p = -1) {
 		}
 	}
 
-	if (!works) return -1;
-	else return best;
-
-
-
-
-
-	// while (vals.size() > 1) {
-	// 	ll val = *vals.begin();
-
-	// 	vals.erase(vals.begin());
-	// 	if (val >= k) continue;
-
-	// 	auto it = vals.lower_bound(k - val);
-	// 	if (it == vals.end()) return -1;
-
-		
-	// 	vals.erase(it);
-	// }
-
-	// if (vals.size() == 0) return 0;
-	// return (*vals.begin());
+	// cout << evenPoss << endl;
+	if (!works) {
+		if (evenPoss) return 0;
+		return -1;
+	}
+	else {
+		// cout << k << best << endl;
+		return best;
+	}
 
 }
 
@@ -124,12 +137,11 @@ int main() {
 
 	ll lo = 1;
 	ll hi = n;
-	k = 3125;
-	cout << dfs(1) << endl;
+
 	while (lo < hi) {
 
 		k = (lo + hi + 1)/2;
-		cout << lo << hi << endl;
+
 		ll val = dfs(1);
 		if (val >= k || val == 0) lo = k;
 		else hi = k-1;

@@ -16,7 +16,7 @@ typedef vector<pii> vpii;
 
 typedef vector<ll> vi;
 
-const ll INF = 1e15;
+const ll INF = 1e18;
 
 #define FOR(i, a, b) for (ll i = (a); i<b; i++)
 
@@ -59,29 +59,32 @@ ll conv(ll val) {
 
 int main() {
 
-	// freopen("slingshot.in", "r", stdin);
-	// freopen("slingshot.out", "w", stdout);
+	freopen("slingshot.in", "r", stdin);
+	freopen("slingshot.out", "w", stdout);
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
 
-	ll n, q;
+	long long n, q;
 	cin >> n >> q;
 
 
-	vector<array<ll, 3> > sl(n);
-	vector<array<ll, 2> > queries(q);
+	vector<array<long long, 3> > sl(n);
+	vector<array<long long, 2> > queries(q);
 
 	vector<ll> cid(n);
-	vector<ll> qid(n);
+	vector<ll> qid(q);
 
 	FOR(i, 0, n) {
 		cid[i]=i;
 		cin >> sl[i][0] >> sl[i][1] >> sl[i][2];
 		vy.pb(sl[i][1]);
 	}
+	vi ansBef(q, INF);
 	FOR(i, 0, q) {
 		qid[i]=i;
 		cin >> queries[i][0] >> queries[i][1];
+		ansBef[i] = abs(queries[i][1]-queries[i][0]);
+
 		vy.pb(queries[i][1]);
 	}
 
@@ -100,19 +103,24 @@ int main() {
 
 	ll cur_s = 0;
 
-	vi ansBef(q, INF);
+	
 
 	for (ll i = 0; i < q; i++) {
 		while (cur_s != n && sl[cid[cur_s]][0] <= queries[qid[i]][0]) {
+			// if (sl[cid[cur_s]][0] > sl[cid[cur_s]][1]) {
+			// 	cur_s++;
+			// 	continue;
+			// }
+
 			up.upd(conv(sl[cid[cur_s]][1]), - sl[cid[cur_s]][0] + sl[cid[cur_s]][1] + sl[cid[cur_s]][2]);
 			down.upd(conv(sl[cid[cur_s]][1]), - sl[cid[cur_s]][0] - sl[cid[cur_s]][1] + sl[cid[cur_s]][2]);
 			cur_s ++;
 		}
 
-		array<ll, 2> cur = queries[qid[i]];
+		array<long long, 2> cur = queries[qid[i]];
 
-		ansBef[qid[i]] = min( cur[0] - cur[1] + up.range_min(conv(cur[1]), n + q + 10), cur[0] + cur[1] + down.range_min(0, conv(cur[1])));
-	
+		ansBef[qid[i]] = min(ansBef[qid[i]], min( cur[0] - cur[1] + up.range_min(conv(cur[1]), n + q + 10), cur[0] + cur[1] + down.range_min(0, conv(cur[1]))));
+		// cout << qid[i] << endl;
 	}
 
 
@@ -125,18 +133,22 @@ int main() {
 
 	for (ll i = q-1; i >= 0; i--) {
 		while (cur_s != -1 && sl[cid[cur_s]][0] >= queries[qid[i]][0]) {
+			// if (sl[cid[cur_s]][0] < sl[cid[cur_s]][1]) {
+			// 	cur_s++;
+			// 	continue;
+			// }
 			up2.upd(conv(sl[cid[cur_s]][1]), sl[cid[cur_s]][0] + sl[cid[cur_s]][1] + sl[cid[cur_s]][2]);
 			down2.upd(conv(sl[cid[cur_s]][1]), sl[cid[cur_s]][0] - sl[cid[cur_s]][1] + sl[cid[cur_s]][2]);
 			cur_s --;
 		}
 
-		array<ll, 2> cur = queries[qid[i]];
+		array<long long, 2> cur = queries[qid[i]];
 
 		ansAft[qid[i]] = min( -cur[0] - cur[1] + up2.range_min(conv(cur[1]), n + q + 10), -cur[0] + cur[1] + down2.range_min(0, conv(cur[1])));
 	
 	}
 
-	FOR(i, 0, q) cout << ansAft[i] << ' ' << ansBef[i] << endl;
+	FOR(i, 0, q) cout << (long long) min(ansAft[i], ansBef[i]) << endl;
 
 	
 
